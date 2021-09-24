@@ -46,30 +46,32 @@ namespace Receiver
 
         private void StartConsuming(IModel consumerChannel)
         {
-            //if (!_isExchangeCreated)
-            //{
-            //    consumerChannel.ExchangeDeclare(
-            //       exchange: "demo-x",
-            //       type: "direct",
-            //       durable: false,
-            //       autoDelete: true);
+            if (!_isExchangeCreated)
+            {
+                consumerChannel.ExchangeDeclare(
+                   exchange: "demo-x",
+                   type: "direct",
+                   durable: true,
+                   autoDelete: false);
 
-            //    _isExchangeCreated = true;
-            //}
+                _isExchangeCreated = true;
+            }
 
             if (!_isQueueConfigured)
             {
                 consumerChannel.QueueDeclare(
                     queue: "demo",
-                    durable: false,
+                    durable: true,
                     exclusive: false,
-                    autoDelete: true,
+                    autoDelete: false,
                     arguments: null);
 
                 consumerChannel.QueueBind(
                         queue: "demo",
                         exchange: "demo-x",
                         routingKey: "demo-message");
+
+                _isQueueConfigured = true;
             }
 
             var consumer = new EventingBasicConsumer(consumerChannel);

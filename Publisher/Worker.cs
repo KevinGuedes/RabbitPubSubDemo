@@ -36,9 +36,11 @@ namespace Publisher
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                PublishEvent(channel);
-                await Task.Delay(10000, stoppingToken);
+                Console.WriteLine("Publicar mensagem? (s/n)");
+                string publishMessage = Console.ReadLine();
+
+                if (publishMessage.ToLower() == "s")
+                    PublishEvent(channel);
             }
         }
 
@@ -49,8 +51,8 @@ namespace Publisher
                 publishingChannel.ExchangeDeclare(
                    exchange: "demo-x",
                    type: "direct",
-                   durable: false,
-                   autoDelete: true);
+                   durable: true,
+                   autoDelete: false);
 
                 _isExchangeCreated = true;
             }
@@ -62,6 +64,8 @@ namespace Publisher
                     exchange: "demo-x",
                     routingKey: "demo-message",
                     body: body);
+
+            _logger.LogInformation("Message published");
         }
     }
 }
