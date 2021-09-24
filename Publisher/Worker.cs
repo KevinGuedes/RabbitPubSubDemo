@@ -41,6 +41,8 @@ namespace Publisher
 
                 if (publishMessage.ToLower() == "s")
                     PublishEvent(channel);
+
+                await Task.Delay(1000, stoppingToken);
             }
         }
 
