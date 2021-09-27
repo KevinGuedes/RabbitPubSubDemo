@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +37,7 @@ namespace Receiver
 
             var connection = connectionFactory.CreateConnection();
             var channel = connection.CreateModel();
-            StartConsuming(channel);
+            StartConsuming<DeveloperCreatedEvent>(channel);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -44,7 +46,7 @@ namespace Receiver
             }
         }
 
-        private void StartConsuming(IModel consumerChannel)
+        private void StartConsuming<T>(IModel consumerChannel)
         {
             if (!_isExchangeCreated)
             {
@@ -69,7 +71,7 @@ namespace Receiver
                 consumerChannel.QueueBind(
                         queue: "demo",
                         exchange: "demo-x",
-                        routingKey: "demo-message");
+                        routingKey: typeof(T).Name);
 
                 _isQueueConfigured = true;
             }
@@ -77,9 +79,9 @@ namespace Receiver
             var consumer = new EventingBasicConsumer(consumerChannel);
             consumer.Received += (model, ea) =>
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                Console.WriteLine("Message received: " + message);
+                var message = Encoding.UTF8.GetString(ea.Body.ToArray());
+                Console.WriteLine("Event received");
+                Console.WriteLine(message);
             };
 
             consumerChannel.BasicConsume(queue: "demo",

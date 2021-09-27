@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,12 +61,14 @@ namespace Publisher
                 _isExchangeCreated = true;
             }
 
-            var message = "Olá, time!";
+            var dev = new Developer("Kevin", "Guedes", 18);
+            var devCreatedEvent = new DeveloperCreatedEvent(dev);
+            var message = JsonConvert.SerializeObject(devCreatedEvent);
             var body = Encoding.UTF8.GetBytes(message);
 
             publishingChannel.BasicPublish(
                     exchange: "demo-x",
-                    routingKey: "demo-message",
+                    routingKey: typeof(DeveloperCreatedEvent).Name,
                     body: body);
 
             _logger.LogInformation("Message published");
