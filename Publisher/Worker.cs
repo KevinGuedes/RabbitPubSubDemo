@@ -38,10 +38,10 @@ namespace Publisher
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("Publicar mensagem? (s/n)");
+                Console.WriteLine("Publish message? (y/n)");
                 string publishMessage = Console.ReadLine();
 
-                if (publishMessage.ToLower() == "s")
+                if (publishMessage.ToLower() == "y")
                     PublishEvent(channel);
 
                 await Task.Delay(1000, stoppingToken);
@@ -50,6 +50,11 @@ namespace Publisher
 
         private void PublishEvent(IModel publishingChannel)
         {
+            var dev = new Developer("Kevin", "Guedes", 18);
+            var devCreatedEvent = new DeveloperCreatedEvent(dev);
+            var message = JsonConvert.SerializeObject(devCreatedEvent);
+            var body = Encoding.UTF8.GetBytes(message);
+
             if (!_isExchangeCreated)
             {
                 publishingChannel.ExchangeDeclare(
@@ -60,11 +65,6 @@ namespace Publisher
 
                 _isExchangeCreated = true;
             }
-
-            var dev = new Developer("Kevin", "Guedes", 18);
-            var devCreatedEvent = new DeveloperCreatedEvent(dev);
-            var message = JsonConvert.SerializeObject(devCreatedEvent);
-            var body = Encoding.UTF8.GetBytes(message);
 
             publishingChannel.BasicPublish(
                     exchange: "demo-x",
